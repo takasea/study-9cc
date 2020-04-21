@@ -162,6 +162,10 @@ Node *new_node_num(int val){
     return node;
 }
 
+Node *expr();
+Node *mul();
+Node *primary();
+
 // 生成規則 expr = mul( "+" mul | "-" mul )*
 Node *expr(){
     Node *node = mul();
