@@ -250,31 +250,21 @@ int main(int argc, char **argv)
     user_input = argv[1];
 
     //トークナイズする
-    token = tokenize(argv[1]);
+    token = tokenize(user_input);
+    Node *node = expr();
 
     // アセンブリの前半部分を出力
     printf(".intel_syntax noprefix\n");
     printf(".global main\n");
     printf("main:\n");
 
-    // 式の最初は数でなければならないので、それをチェックして
-    // 最初のmov命令を出力
-    printf("    mov rax, %d\n", expect_number());
+    // 抽象構文木を下りながらコード生成
+    gen(node);
 
-    // '+ <数>'あるいは'- <数>'というトークンの並びを消費しつつアセンブリを出力
-    while (!at_eof())
-    {
-        if (consume('+'))
-        {
-            printf("    add rax, %d\n", expect_number());
-            continue;
-        }
+    // スタックトップに式全体の値が残っているはずなので
+    // それをRAXにロードして関数からの返り値とする
 
-        expect('-');
-        printf("    sub rax, %d\n", expect_number());
-
-    }
-
+    printf("    pop rax\n");
     printf("    ret\n");
     return 0;
 }
