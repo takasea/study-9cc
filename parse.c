@@ -7,7 +7,6 @@
 #include "9cc.h"
 
 
-
 // エラーを報告するための関数
 void error_at(char *loc, char *fmt, ...)
 {
@@ -31,6 +30,15 @@ bool consume(char *op)
         return false;
     token = token->next;
     return true;
+}
+
+
+Token *consume_ident(){
+    if(token->kind != TK_INDENT)
+        return NULL;
+    Token *tok = token;
+    token = token->next; 
+    return tok;
 }
 
 // 次のトークンが期待している記号のときには、トークンを1つ読み進める。
@@ -135,7 +143,12 @@ Node *new_node_num(int val){
     return node;
 }
 
+
+
+void program();
+Node *stmt();
 Node *expr();
+Node *assign();
 Node *equality();
 Node *relational();
 Node *add();
@@ -144,10 +157,34 @@ Node *unary();
 Node *primary();
 
 
-// 生成規則 expr = equality
-Node *expr(){
-    return equality();
+// 生成規則 program = stmt*
+void program(){
+    int i = 0;
+    while(!at_eof())
+        code[i++] = stmt();
+    code[i] = NULL;
 }
+
+// 生成規則 stmt = expr ";"
+Node *stmt(){
+    Node *node = expr();
+    expect(";");
+    return node;
+}
+
+// 生成規則 expr = assign
+Node *expr(){
+    return assign();
+}
+
+// 生成規則 assign = equality("=" assign)?
+Node *assign(){
+    Node *node = equality();
+    if(consume("="))
+        node = new_node(ND_ASSIGN, node, assign());
+    return node;
+}
+
 // 生成規則 equality = relational("==" relational | "!=" relational)*
 Node *equality(){
     Node *node = relational();
@@ -217,12 +254,20 @@ Node *unary(){
     return primary();
 }
 
-// 生成規則 primary = num | "(" expr ")"
+// 生成規則 primary = num | ident | "(" expr ")"
 Node *primary(){
     // 次のトークンが"("なら、"(" expr ")"のはず
     if(consume("(")){
         Node *node = expr();
         expect(")");
+        return node;
+    }
+
+    Token *tok = consume_ident();
+    if(tok){
+        Node *node = calloc(1, sizeof(Node));
+        node->kind = ND_LVAR;
+        node->offset = (token->str[0] - 'a' + 1) * 8;
         return node;
     }
 

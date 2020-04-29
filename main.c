@@ -4,6 +4,7 @@
 
 char *user_input;
 Token *token;
+Node *code[100];
 
 int main(int argc, char **argv)
 {
