@@ -7,6 +7,7 @@ extern Node *code[100];
 
 extern Token *tokenize(char *p);
 extern Node *expr();
+extern void program();
 
 extern void gen(Node *node);
 

@@ -32,12 +32,12 @@ bool consume(char *op)
     return true;
 }
 
-
+// todo: 本当はこの中でtokenを進めたいけど、進める前のトークンにアクセスする書き方がわからない
 Token *consume_ident(){
     if(token->kind != TK_INDENT)
         return NULL;
     Token *tok = token;
-    token = token->next; 
+    // token = token->next; 
     return tok;
 }
 
@@ -99,7 +99,7 @@ Token *tokenize(char *p)
             continue;
         }
 
-        if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')' || *p == '<' || *p == '>')
+        if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')' || *p == '<' || *p == '>' || *p == '=' || *p == ';')
         {
             cur = new_token(TK_RESERVED, cur, p++, 1);
             continue;
@@ -268,6 +268,7 @@ Node *primary(){
         Node *node = calloc(1, sizeof(Node));
         node->kind = ND_LVAR;
         node->offset = (token->str[0] - 'a' + 1) * 8;
+        token = token->next;
         return node;
     }
 
