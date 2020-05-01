@@ -45,12 +45,17 @@ assert 1 '1>=0;'
 assert 1 '1>=1;'
 assert 0 '1>=2;'
 
-assert 1 'a=1;'
-assert 30 'z=15*2;'
-assert 2 'a=1; a+1;'
-assert 2 'a=1*2+3-4; b=a/a; a+b;'
-assert 5 'a=2==2; a+a*4;'
-assert 32  'a=1;b=2;c=3;z=26;a+b+c+z;'
+assert 0 'a;'
+assert 1 'a = 1;'
+assert 30 'z = 15  * 2;'
+assert 2 'a = 1; a + 1;'
+assert 2 'a = 1 * 2 + 3 - 4; b = a / a; a + b;'
+assert 5 'a = 2 == 2; a + a * 4;'
+assert 32  'a = 1;b = 2; c = 3;z = 26; a + b + c + z;'
+assert 1 'a = 1; b = a; c = b;'
+
+assert 0 'name = 1; age = name - 1;'
+assert 7 'one = 1; two = 2; three = 3; one + two * three;'
 
 
 echo OK
