@@ -15,10 +15,11 @@ extern void gen(Node *node);
 // トークンの種類
 typedef enum
 {
-    TK_RESERVED, // 記号
-    TK_INDENT,   // 識別子
-    TK_NUM,      // 整数トークン
-    TK_EOF,      // 入力の終わりを表すトークン
+    TK_RESERVED,    // 記号
+    TK_INDENT,      // 識別子
+    TK_NUM,         // 整数トークン
+    TK_EOF,         // 入力の終わりを表すトークン
+    TK_RETURN,
 } TokenKind;
 
 
@@ -46,6 +47,7 @@ typedef enum{
     ND_LE,      // <= >=
     ND_ASSIGN,  // =
     ND_LVAR,    // ローカル変数
+    ND_RETURN,  // return
 } NodeKind;
 
 

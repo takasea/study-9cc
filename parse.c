@@ -33,7 +33,7 @@ void error_at(char *loc, char *fmt, ...)
     exit(1);
 }
 
-// 次のトークンが期待している記号のときには、トークンを1つ読み進めて
+// 次のトークンが期待している(TK_RESERVEDとして扱われる)記号のときには、トークンを1つ読み進めて
 // 真を返す。それ以外の場合には偽を返す。
 bool consume(char *op)
 {
@@ -76,6 +76,11 @@ bool at_eof()
     return token->kind == TK_EOF;
 }
 
+//与えられた文字が英数字かアンダースコアか判定
+bool is_alnum(char c){
+    return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || ('0' <= c && c <= '9' || (c == '_'));
+}
+
 // 新しいトークンを作成してcurに繋げる
 Token *new_token(TokenKind kind, Token *cur, char *str, int len)
 {
@@ -115,6 +120,13 @@ Token *tokenize(char *p)
             continue;
         }
 
+        if(!strncmp(p, "return", 6) && !is_alnum(p[6])){
+            cur = new_token(TK_RETURN, cur, p, 6);
+            p += 6;
+            continue;
+        }
+
+        //変数の場合
         if ('a' <= *p && *p <= 'z'){
             int ident_count = 0;
             while('a' <= *p && *p <= 'z'){
@@ -188,11 +200,19 @@ void program(){
     code[i] = NULL;
 }
 
-// 生成規則 stmt = expr ";"
+
+// 生成規則 stmt =   expr ";"  | "return" expr ";"
 Node *stmt(){
-    Node *node = expr();
+    Node *node;
+    
+    if(token->kind == TK_RETURN){
+        token = token->next;
+        node = new_node(ND_RETURN, expr(), NULL);
+    } else {
+        node = expr();
+    }
     expect(";");
-    return node;
+    return node;    
 }
 
 // 生成規則 expr = assign
@@ -286,6 +306,7 @@ Node *primary(){
         return node;
     }
 
+    // 変数
     Token *tok = consume_ident();
     if(tok){
         Node *node = calloc(1, sizeof(Node));

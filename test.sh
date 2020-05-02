@@ -58,4 +58,10 @@ assert 0 'name = 1; age = name - 1;'
 assert 7 'one = 1; two = 2; three = 3; one + two * three;'
 
 
+assert 5 'a = 5; return a;'
+assert 10 'retur = 5; return retur + 5;'
+assert 10 'returnn = 5; return returnn + 5;'
+assert 3 'a = 1; b = 2; return a + b;'
+assert 1 'return 1; return 2;'
+
 echo OK
