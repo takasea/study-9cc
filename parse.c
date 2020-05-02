@@ -33,11 +33,13 @@ void error_at(char *loc, char *fmt, ...)
     exit(1);
 }
 
-// 次のトークンが期待している(TK_RESERVEDとして扱われる)記号のときには、トークンを1つ読み進めて
+// 次のトークンが期待している記号(TK_RESERVED、TK_RETURN)のときには、トークンを1つ読み進めて
 // 真を返す。それ以外の場合には偽を返す。
 bool consume(char *op)
 {
-    if (token->kind != TK_RESERVED || strlen(op) != token->len || memcmp(token->str, op, token->len))
+    if(token->kind != TK_RESERVED && token->kind != TK_RETURN)
+        return false;
+    if (strlen(op) != token->len || memcmp(token->str, op, token->len))
         return false;
     token = token->next;
     return true;
@@ -205,8 +207,7 @@ void program(){
 Node *stmt(){
     Node *node;
     
-    if(token->kind == TK_RETURN){
-        token = token->next;
+    if(consume("return")){
         node = new_node(ND_RETURN, expr(), NULL);
     } else {
         node = expr();
