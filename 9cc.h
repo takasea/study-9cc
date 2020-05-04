@@ -1,15 +1,19 @@
 typedef struct Token Token;
 typedef struct Node Node;
+typedef struct LVar LVar;
 
 extern char *user_input;
 extern Token *token;
 extern Node *code[100];
+extern LVar *locals;
 
 extern Token *tokenize(char *p);
-extern Node *expr();
 extern void program();
 
+extern int count_lvar();
 extern void gen(Node *node);
+
+
 
 
 // トークンの種類
@@ -59,3 +63,13 @@ struct Node{
     int val;        // kindがND_NUMの場合のみ使う
     int offset;     // kindがND_LVARの場合のみ使う
 };
+
+
+//ローカル変数の型
+struct LVar{
+    LVar *next; //次の変数がNULL
+    char *name; //変数の名前
+    int len;    //名前の長さ
+    int offset; //RBPからのオフセット
+};
+

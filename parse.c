@@ -6,17 +6,7 @@
 #include <stdlib.h>
 #include "9cc.h"
 
-typedef struct LVar LVar;
 
-//ローカル変数の型
-struct LVar{
-    LVar *next; //次の変数がNULL
-    char *name; //変数の名前
-    int len;    //名前の長さ
-    int offset; //RBPからのオフセット
-};
-
-LVar *locals;
 
 // エラーを報告するための関数
 void error_at(char *loc, char *fmt, ...)
@@ -180,6 +170,20 @@ LVar *find_lvar(Token *tok){
     return NULL;
 }
 
+// 変数の数をintで返す
+int count_lvar(){
+    int count = 0;
+    LVar *lvar = locals;
+
+    if(lvar == NULL)
+        return 0;
+    
+    while(lvar != NULL){
+        count++;
+        lvar = lvar->next;
+    }
+    return count - 1;
+}
 
 
 void program();
@@ -316,8 +320,10 @@ Node *primary(){
         if(lvar){
             node->offset = lvar->offset;
         } else{
+            // localsの先頭
             if(!locals)
                 locals = calloc(1,sizeof(LVar));
+            
             lvar = calloc(1, sizeof(lvar));
             lvar->next = locals;
             lvar->name = tok->str;

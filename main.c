@@ -5,6 +5,8 @@
 char *user_input;
 Token *token;
 Node *code[100];
+LVar *locals;
+
 
 int main(int argc, char **argv)
 {
@@ -20,15 +22,16 @@ int main(int argc, char **argv)
     token = tokenize(user_input);
     program();
 
+
     // アセンブリの前半部分を出力
     printf(".intel_syntax noprefix\n");
     printf(".global main\n");
     printf("main:\n");
 
-    //変数26個分の領域を確保
+    //変数分の領域を確保
     printf("    push rbp\n");
     printf("    mov rbp, rsp\n");
-    printf("    sub rsp, 208\n");
+    printf("    sub rsp, %d\n", count_lvar()*8);
 
     //先頭の式から順にコード生成
     for(int i = 0; code[i]; i++){
