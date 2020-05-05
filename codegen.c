@@ -25,6 +25,7 @@ void gen(Node *node){
     
     if(node->kind == ND_ELSE){  // if(A) B else C
         printf("#--ND_ELSE\n");
+        printf("    push rax\n");
         gen(node->lhs->lhs);    // A
         printf("    pop rax\n");
         printf("    cmp rax, 0\n");
@@ -47,6 +48,20 @@ void gen(Node *node){
         gen(node->rhs);//B
 
         printf("    .L.if.end:\n");
+        return;
+    }
+
+    if(node->kind == ND_WHILE){ //while(A) B
+        printf("    push rax\n");
+        printf("#--ND_WHILE\n");
+        printf("  .L.begin.while:\n");
+        gen(node->lhs);
+        printf("    pop rax\n");
+        printf("    cmp rax, 0\n");
+        printf("    je  .L.end.while\n");
+        gen(node->rhs);
+        printf("    jmp .L.begin.while\n");
+        printf("  .L.end.while:\n");
         return;
     }
     

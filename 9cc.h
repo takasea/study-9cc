@@ -51,6 +51,7 @@ typedef enum{
     ND_RETURN,  // return
     ND_IF,
     ND_ELSE,
+    ND_WHILE,
 } NodeKind;
 
 

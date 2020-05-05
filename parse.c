@@ -128,6 +128,12 @@ Token *tokenize(char *p)
             continue;
         }
 
+        if(!strncmp(p, "while", 5) && !is_alnum(p[5])){
+            cur = new_token(TK_RESERVED, cur, p, 5);
+            p += 5;
+            continue;
+        }
+
 
         //変数の場合
         if ('a' <= *p && *p <= 'z'){
@@ -220,6 +226,7 @@ void program(){
 
 // 生成規則 stmt =   expr ";"  
 //                  | "if" "(" expr ")" stmt ("else" stmt)?
+//                  | "while" "(" expr ")" stmt 
 //                  | "return" expr ";"
 Node *stmt(){
     Node *node;
@@ -239,6 +246,16 @@ Node *stmt(){
         node->rhs = stmt();
         if(consume("else"))
             node = new_node(ND_ELSE, node, stmt());
+        return node;
+    }
+
+    if(consume("while")){
+        expect("(");
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_WHILE;
+        node->lhs = expr();
+        expect(")");
+        node->rhs = stmt();
         return node;
     }
 
