@@ -15,12 +15,41 @@ void gen(Node *node){
     
     if(node->kind == ND_RETURN){
         gen(node->lhs);
+        printf("#--ND_RETURN\n");
         printf("    pop rax\n");
         printf("    mov rsp, rbp\n");
         printf("    pop rbp\n");
         printf("    ret\n");
         return;
     }
+    
+    if(node->kind == ND_ELSE){  // if(A) B else C
+        printf("#--ND_ELSE\n");
+        gen(node->lhs->lhs);    // A
+        printf("    pop rax\n");
+        printf("    cmp rax, 0\n");
+        printf("    je  .L.else.C\n");
+        gen(node->lhs->rhs);// B
+        printf("    jmp .L.else.end\n");
+        printf("  .L.else.C:\n");
+        gen(node->rhs);// C
+        printf("  .L.else.end:\n");
+        return;
+    }
+
+    if(node->kind == ND_IF){ //if(A) B
+        printf("#--ND_IF\n");
+        printf("    push rax\n");
+        gen(node->lhs);//A
+        printf("    pop rax\n");
+        printf("    cmp rax, 0\n");
+        printf("    je  .L.if.end\n");
+        gen(node->rhs);//B
+
+        printf("    .L.if.end:\n");
+        return;
+    }
+    
 
     switch (node->kind){
         case ND_NUM:
@@ -33,6 +62,7 @@ void gen(Node *node){
             printf("    push rax\n");
             return;
         case ND_ASSIGN:
+            printf("#--ND_ASSIGN\n");
             gen_lval(node->lhs);
             gen(node->rhs);
 

@@ -64,4 +64,39 @@ assert 10 'returnn = 5; return returnn + 5;'
 assert 3 'a = 1; b = 2; return a + b;'
 assert 1 'return 1; return 2;'
 
+assert 3 'if(0) return 2; return 3;'
+assert 3 'if(1-1) return 2; return 3;'
+assert 2 'if(1) return 2; return 3;'
+assert 2 'if(2-1) return 2; return 3;'
+
+assert 3 'a=1; if(a==1) a = 2; return 5-a;'
+assert 1 'a=0; if(1) a = 1; return 2-a;'
+
+
+assert 1 'a=3; if(a==3) return 1; else return 5;'
+assert 5 'a=3; if(a!=3) return 1; else return 5;'
+assert 5 'a=1; if(a!=1) return 1; else return 5;'
+
+assert 1 'a=5; if(a!=1) a = 1; else a = 3;return a;'
+assert 3 'a=1; if(a!=1) return 1; else a = 5;  return 3;'
+assert 1 'a=1; if(a==2) a=3;'
+
+assert 1 'a=2; return 3-a;'
+assert 2 'a=2; if(1) a=1; return 3-a;'
+
+
+assert 1 'a=2; b=3; 4-b;'
+assert 2 'a=2; b=3; c=4; if(0) 1; 5-b;' 
+assert 1 'a=2; b=3; c=4; if(0) 1; 5-c;'
+
+assert 2 'a=2; b=3; if(0) 1; 4-a;'
+assert 1 'a=2; b=3; if(0) 1; 4-b;'
+
+assert 1 'a=2; if(0) 1; 3-a;' 
+assert 1 'a=2; if(0) 1; return 3-a;'
+
+assert 3 'a=1; if(0) return a; else a=3; return a;'
+assert 2 'a=2; if(1) return a; else a=3; return a;'
+
+
 echo OK

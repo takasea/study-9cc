@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include "9cc.h"
 
-
+LVar *locals;
 
 // エラーを報告するための関数
 void error_at(char *loc, char *fmt, ...)
@@ -23,13 +23,11 @@ void error_at(char *loc, char *fmt, ...)
     exit(1);
 }
 
-// 次のトークンが期待している記号(TK_RESERVED、TK_RETURN)のときには、トークンを1つ読み進めて
+// 次のトークンが期待している記号(TK_RESERVED)のときには、トークンを1つ読み進めて
 // 真を返す。それ以外の場合には偽を返す。
-bool consume(char *op)
+int consume(char *op)
 {
-    if(token->kind != TK_RESERVED && token->kind != TK_RETURN)
-        return false;
-    if (strlen(op) != token->len || memcmp(token->str, op, token->len))
+    if (token->kind != TK_RESERVED | strlen(op) != token->len || memcmp(token->str, op, token->len))
         return false;
     token = token->next;
     return true;
@@ -63,13 +61,13 @@ int expect_number()
     return val;
 }
 
-bool at_eof()
+int at_eof()
 {
     return token->kind == TK_EOF;
 }
 
 //与えられた文字が英数字かアンダースコアか判定
-bool is_alnum(char c){
+int is_alnum(char c){
     return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || ('0' <= c && c <= '9' || (c == '_'));
 }
 
@@ -113,10 +111,23 @@ Token *tokenize(char *p)
         }
 
         if(!strncmp(p, "return", 6) && !is_alnum(p[6])){
-            cur = new_token(TK_RETURN, cur, p, 6);
+            cur = new_token(TK_RESERVED, cur, p, 6);
             p += 6;
             continue;
         }
+
+        if(!strncmp(p, "if", 2) && !is_alnum(p[2])){
+            cur = new_token(TK_RESERVED, cur, p, 2);
+            p += 2;
+            continue;
+        }
+
+        if(!strncmp(p, "else", 4) && !is_alnum(p[4])){
+            cur = new_token(TK_RESERVED, cur, p, 4);
+            p += 4;
+            continue;
+        }
+
 
         //変数の場合
         if ('a' <= *p && *p <= 'z'){
@@ -207,15 +218,31 @@ void program(){
 }
 
 
-// 生成規則 stmt =   expr ";"  | "return" expr ";"
+// 生成規則 stmt =   expr ";"  
+//                  | "if" "(" expr ")" stmt ("else" stmt)?
+//                  | "return" expr ";"
 Node *stmt(){
     Node *node;
     
     if(consume("return")){
         node = new_node(ND_RETURN, expr(), NULL);
-    } else {
-        node = expr();
+        expect(";");
+        return node;
     }
+
+    if (consume("if")) {
+        expect("(");
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_IF;
+        node->lhs = expr();
+        expect(")");
+        node->rhs = stmt();
+        if(consume("else"))
+            node = new_node(ND_ELSE, node, stmt());
+        return node;
+    }
+
+    node = expr();
     expect(";");
     return node;    
 }
@@ -292,13 +319,13 @@ Node *mul(){
     }
 }
 
-//生成規則 unary = ( "+" | "-" )? primary
+//生成規則 unary = ( "+" | "-" )? unary
 Node *unary(){
 
     if(consume("+"))
         return primary();
     if(consume("-"))
-        return new_node(ND_SUB, new_node_num(0), primary());
+        return new_node(ND_SUB, new_node_num(0), unary());
     return primary();
 }
 
