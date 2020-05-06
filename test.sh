@@ -105,5 +105,28 @@ assert 1 'a=0; while(1) return 1; return a;'
 assert 2 'a=0; while(1) if(a!=0) return 1; else return 2; return 3;'
 assert 1 'a=0; while(1) if(a==0) return 1; else return 2; return 3;'
 
+assert 5 'b=0; for(a=0; a<5; a=a+1) b=b+1; return b;'
+assert 5 'a=0; for(;a<5;a=a+1) 3; return a;'
+assert 5 'a=0; for(;a<5;) a=a+1; return a;'
+assert 1 'a=1; for(;;) return a;'
+
+
+assert 1 '0<5;'
+assert 1 'a=0; if(a<5) a=a+1; return a;'
+assert 5 'a=5; if(a<5) a=a+1; return a;'
+assert 2 'a=5; if(a<5) a=a+1; else return 2; return a;'
+assert 5 'a=1; for(;;) if(a<5) a=a+1; else return a;'
+
+assert 5 'a=5; for(;;) if(a<5) a=a+1; else return a;'
+assert 1 'a=0; if(0<5) a=a+1; else return a; return a;'
+assert 1 'a=0; if(a<5) a=a+1; else return a; return a;'
+
+assert 5 'a=1; for(;;) if(a<5) a=a+1; else return a; return a;'
+
+assert 3 'a=0; for(;;) if(a<5) a=a+1; else return 3; return 20;'
+assert 5 'a=0; for(;;) if(a<5) a=a+1; else return a; return 13;'
+assert 5 'b=0; for(a=0; a<5; a=a+1) b=b+1; return b;'
+
+
 
 echo OK

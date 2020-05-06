@@ -34,6 +34,7 @@ int main(int argc, char **argv)
 
     //先頭の式から順にコード生成
     for(int i = 0; code[i]; i++){
+        printf("#code[%d]\n", i);
         gen(code[i]);
 
         //式の評価結果としてスタックに１つの値が残っているはずなのでスタックが溢れないようにポップしておく

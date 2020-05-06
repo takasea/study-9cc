@@ -66,6 +66,13 @@ int at_eof()
     return token->kind == TK_EOF;
 }
 
+//次のトークンがcurかどうか調べる
+int check_next_token(char *cur){
+    if(!strncmp(token->next->str, cur, token->next->len))
+        return true;
+    return false;
+}
+
 //与えられた文字が英数字かアンダースコアか判定
 int is_alnum(char c){
     return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || ('0' <= c && c <= '9' || (c == '_'));
@@ -131,6 +138,12 @@ Token *tokenize(char *p)
         if(!strncmp(p, "while", 5) && !is_alnum(p[5])){
             cur = new_token(TK_RESERVED, cur, p, 5);
             p += 5;
+            continue;
+        }
+
+        if(!strncmp(p, "for", 3) && !is_alnum(p[3])){
+            cur = new_token(TK_RESERVED, cur, p, 3);
+            p += 3;
             continue;
         }
 
@@ -227,6 +240,7 @@ void program(){
 // 生成規則 stmt =   expr ";"  
 //                  | "if" "(" expr ")" stmt ("else" stmt)?
 //                  | "while" "(" expr ")" stmt 
+//                  | "for" "(" expr? ";" expr? ";" expr? ";" ")" stmt
 //                  | "return" expr ";"
 Node *stmt(){
     Node *node;
@@ -256,6 +270,40 @@ Node *stmt(){
         node->lhs = expr();
         expect(")");
         node->rhs = stmt();
+        return node;
+    }
+
+    //"for" "(" expr? ";" expr? ";" expr? ";" ")" stmt
+    //          (nd1_rhs; nd2_rhs; nd3_rhs) nd4_rhs
+    if(consume("for")){ //todo:コンパクトに書く
+
+        if(check_next_token(";")){
+            expect("(");
+            node = new_node(ND_FOR, NULL, NULL);
+        }else{
+            expect("(");
+            node = new_node(ND_FOR, NULL, expr());
+        }
+
+        if(check_next_token(";")){
+            expect(";");
+            node = new_node(ND_FOR, node, NULL);
+        }else{
+            expect(";");
+            node = new_node(ND_FOR, node, expr());
+        }
+
+        if(check_next_token(")")){
+            expect(";");
+            node = new_node(ND_FOR, node, NULL);
+        }else{
+            expect(";");
+            node = new_node(ND_FOR, node, expr());
+        }
+
+
+        expect(")");
+        node = new_node(ND_FOR, node, stmt());
         return node;
     }
 

@@ -52,6 +52,7 @@ typedef enum{
     ND_IF,
     ND_ELSE,
     ND_WHILE,
+    ND_FOR,
 } NodeKind;
 
 
