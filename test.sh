@@ -127,6 +127,14 @@ assert 3 'a=0; for(;;) if(a<5) a=a+1; else return 3; return 20;'
 assert 5 'a=0; for(;;) if(a<5) a=a+1; else return a; return 13;'
 assert 5 'b=0; for(a=0; a<5; a=a+1) b=b+1; return b;'
 
+assert 0 '{}'
+assert 1 '{} a=1;'
+assert 1 '{a=1;} return a;'
+assert 1 '{a=1;b=2;} return a;'
+
+assert 3 '{1; {2;} return 3;}'
+assert 10 'i=0; while(i<10) i=i+1; return i;'
+assert 55 'i=0; j=0; while(i<=10) {j=i+j; i=i+1;} return j;'
 
 
 echo OK

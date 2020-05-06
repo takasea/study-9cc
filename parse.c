@@ -111,7 +111,7 @@ Token *tokenize(char *p)
             continue;
         }
 
-        if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')' || *p == '<' || *p == '>' || *p == '=' || *p == ';')
+        if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')' || *p == '<' || *p == '>' || *p == '=' || *p == ';' || *p == '{'|| *p == '}')
         {
             cur = new_token(TK_RESERVED, cur, p++, 1);
             continue;
@@ -192,6 +192,7 @@ Node *new_node_num(int val){
     return node;
 }
 
+
 // 変数を名前で検索する。見つからなかった場合はNULLを返す
 LVar *find_lvar(Token *tok){
     for(LVar *var = locals; var; var = var->next)
@@ -238,12 +239,27 @@ void program(){
 
 
 // 生成規則 stmt =   expr ";"  
+//                  | "{" stmt* "}"
 //                  | "if" "(" expr ")" stmt ("else" stmt)?
 //                  | "while" "(" expr ")" stmt 
 //                  | "for" "(" expr? ";" expr? ";" expr? ";" ")" stmt
 //                  | "return" expr ";"
 Node *stmt(){
     Node *node;
+
+    if(consume("{")){
+        if(consume("}"))
+            return new_node_num(0);
+
+        Node *node = calloc(1, sizeof(Node));
+        node->kind = ND_BLOCK;
+        int i = 0;
+        while(!consume("}")){
+            node->block[i++] = stmt();
+        }
+        node->block[i] = NULL;
+        return node;
+    }
     
     if(consume("return")){
         node = new_node(ND_RETURN, expr(), NULL);
@@ -274,7 +290,6 @@ Node *stmt(){
     }
 
     //"for" "(" expr? ";" expr? ";" expr? ";" ")" stmt
-    //          (nd1_rhs; nd2_rhs; nd3_rhs) nd4_rhs
     if(consume("for")){ //todo:コンパクトに書く
 
         if(check_next_token(";")){

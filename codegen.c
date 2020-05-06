@@ -12,6 +12,16 @@ void gen_lval(Node *node){
 
 // コードジェネレータ
 void gen(Node *node){
+
+    if(node->kind == ND_BLOCK){
+        printf("#--ND_BLOCK\n");
+
+        for(int i = 0; node->block[i]; i++){
+            printf("#node->block[%d]\n", i);
+            gen(node->block[i]);
+        }
+        return;
+    }
     
     if(node->kind == ND_RETURN){
         gen(node->lhs);
