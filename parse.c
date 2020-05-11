@@ -73,6 +73,12 @@ int check_next_token(char *cur){
     return false;
 }
 
+int check_token_kind(TokenKind cur_kind){
+    if(token->kind == cur_kind)
+        return true;
+    return false;
+}
+
 //与えられた文字が英数字かアンダースコアか判定
 int is_alnum(char c){
     return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || ('0' <= c && c <= '9' || (c == '_'));
@@ -111,7 +117,7 @@ Token *tokenize(char *p)
             continue;
         }
 
-        if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')' || *p == '<' || *p == '>' || *p == '=' || *p == ';' || *p == '{'|| *p == '}')
+        if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')' || *p == '<' || *p == '>' || *p == '=' || *p == ';' || *p == '{'|| *p == '}'|| *p == ',')
         {
             cur = new_token(TK_RESERVED, cur, p++, 1);
             continue;
@@ -149,9 +155,9 @@ Token *tokenize(char *p)
 
 
         //変数の場合
-        if ('a' <= *p && *p <= 'z'){
+        if (('a' <= *p && *p <= 'z') || *p=='_'){
             int ident_count = 0;
-            while('a' <= *p && *p <= 'z'){
+            while(('a' <= *p && *p <= 'z') || *p=='_'){
                 ident_count++;
                 p++;
             }
@@ -247,6 +253,7 @@ void program(){
 Node *stmt(){
     Node *node;
 
+    //block
     if(consume("{")){
         if(consume("}"))
             return new_node_num(0);
@@ -409,7 +416,9 @@ Node *unary(){
     return primary();
 }
 
-// 生成規則 primary = num | ident | "(" expr ")"
+// 生成規則 primary = num 
+//                  | ident( "(" ")" )?
+//                  | "(" expr ")"
 Node *primary(){
     // 次のトークンが"("なら、"(" expr ")"のはず
     if(consume("(")){
@@ -418,27 +427,43 @@ Node *primary(){
         return node;
     }
 
-    // 変数
+    // 変数と関数
     Token *tok = consume_ident();
     if(tok){
         Node *node = calloc(1, sizeof(Node));
-        node->kind = ND_LVAR;
-        LVar *lvar = find_lvar(tok);
-        if(lvar){
-            node->offset = lvar->offset;
-        } else{
+        if(consume("(")){
+            //関数
+            node->kind = ND_FUNCTION;
+            node->label = tok->str;
+            node->fn_len = tok->len;
+            if(check_token_kind(TK_NUM))
+                node->rhs = new_node_num(expect_number());
+            node->lhs = NULL;
+            while(consume(",")){                
+                node = new_node(ND_FUNCTION, node, new_node_num(expect_number()));
+            }
+            expect(")");
+        }else{
+            //変数
+            node->kind = ND_LVAR;
+            LVar *lvar = find_lvar(tok);
+            if(lvar){
+                node->offset = lvar->offset;
+            } else{
             // localsの先頭
-            if(!locals)
-                locals = calloc(1,sizeof(LVar));
+                if(!locals)
+                    locals = calloc(1,sizeof(LVar));
             
-            lvar = calloc(1, sizeof(lvar));
-            lvar->next = locals;
-            lvar->name = tok->str;
-            lvar->len = tok->len;
-            lvar->offset = locals->offset + 8;
-            node->offset = lvar->offset;
-            locals = lvar;
+                lvar = calloc(1, sizeof(lvar));
+                lvar->next = locals;
+                lvar->name = tok->str;
+                lvar->len = tok->len;
+                lvar->offset = locals->offset + 8;
+                node->offset = lvar->offset;
+                locals = lvar;
+            }
         }
+        
         return node;
     }
 

@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "9cc.h"
 
 void gen_lval(Node *node){
@@ -12,6 +14,46 @@ void gen_lval(Node *node){
 
 // コードジェネレータ
 void gen(Node *node){
+
+    if(node->kind == ND_FUNCTION){
+        printf("#--ND_FUNCTION\n");
+        char *f_name;
+        
+        if(node->rhs){  //引数がある場合
+            Node *node_count = node;
+            int arg_count = 1;
+    
+            while(node_count->lhs != NULL){
+                arg_count++;
+                printf("    push %d\n", node_count->rhs->val);
+                node_count = node_count->lhs; 
+            }
+            printf("    push %d\n", node_count->rhs->val);
+
+            f_name = calloc(1, sizeof(node_count->fn_len));
+            strncpy(f_name, node_count->label, node_count->fn_len); 
+
+            if(6 < arg_count)
+                printf("#引数が6個以上には対応していません\n");
+
+            char res_name[6][4] = { "rdi", "rsi", "rdx", "rcx", "r8", "r9" };
+
+            int i = 0;
+            while(i < arg_count)
+                printf("    pop %s\n", res_name[i++]);
+            
+            printf("    push %d\n", arg_count);
+        }else{
+            f_name = calloc(1, sizeof(node->fn_len));
+            strncpy(f_name, node->label, node->fn_len);
+            printf("    push 1\n");
+        }
+
+        printf("    pop rax\n");
+        printf("    call %s\n", f_name);
+        return;
+    }
+
 
     if(node->kind == ND_BLOCK){
         printf("#--ND_BLOCK\n");

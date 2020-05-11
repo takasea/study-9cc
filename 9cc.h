@@ -54,6 +54,7 @@ typedef enum{
     ND_WHILE,
     ND_FOR,
     ND_BLOCK,
+    ND_FUNCTION,
 } NodeKind;
 
 
@@ -64,6 +65,8 @@ struct Node{
     Node *rhs;      // 右辺
     int val;        // kindがND_NUMの場合のみ使う
     int offset;     // kindがND_LVARの場合のみ使う
+    char *label;    // kindがND_FUNCTIONの場合のみ使う
+    int fn_len;     // kindがND_FUNCTIONの場合のみ使う
     Node *block[100];    // kindがND_BLOCKの場合のみ使う ブロックに含まれる式
 };
 
